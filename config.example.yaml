@@ -1,0 +1,42 @@
+# Copy to config.yaml and edit. Run: research-radar run -c config.yaml
+llm:
+  provider: anthropic        # anthropic | openai | ollama | azure_openai | bedrock_converse ...
+  model: null                # null = provider default (see llm.py)
+
+store: data/radar.sqlite     # remembers what you've already seen
+output_dir: digests
+
+topics:
+  - name: physics-informed-ml
+    title: Physics-Informed ML for Industrial Systems
+    brief: >
+      I build ML for physical systems (fluid flow, heat transfer, rotating equipment, wells).
+      I want papers that combine physics models with machine learning (PINNs, hybrid/grey-box
+      models, neural operators) and show results on real industrial or experimental data.
+      Pure theory or toy PDE benchmarks are low priority.
+    min_relevance: 6
+    sources:
+      - name: arxiv
+        query: 'abs:"physics-informed" AND (abs:industrial OR abs:"digital twin" OR abs:reservoir OR abs:"heat transfer")'
+        max_results: 30
+
+  - name: ai-oil-gas-ops
+    title: AI for Oil & Gas Production Operations
+    brief: >
+      AI and automation for upstream production: artificial lift, production forecasting,
+      decline-curve analysis, predictive maintenance, anomaly detection on well sensor data,
+      closed-loop optimization. Field-validated results matter most.
+    sources:
+      - name: arxiv
+        query: '(abs:"artificial lift" OR abs:"production forecasting" OR abs:"decline curve") AND abs:learning'
+        max_results: 25
+
+  - name: clinical-ml-validation
+    title: Validating ML Diagnostics
+    brief: >
+      How diagnostic ML models are validated for clinical use: external validation, calibration,
+      dataset shift, reporting guidelines (TRIPOD+AI, STARD), and regulatory evidence.
+    sources:
+      - name: pubmed
+        query: '(machine learning[Title/Abstract]) AND (diagnostic accuracy[Title/Abstract]) AND (external validation[Title/Abstract])'
+        max_results: 25

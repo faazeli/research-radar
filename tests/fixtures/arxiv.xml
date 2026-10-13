@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/0s5GlLimS3Ks3RAdS6w60z7q+qQ</id>
+  <title>arXiv Query: search_query=abs:"physics-informed"&amp;id_list=&amp;start=0&amp;max_results=3</title>
+  <updated>2026-10-13T01:16:03Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=abs:%22physics-informed%22&amp;start=0&amp;max_results=3&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>3</opensearch:itemsPerPage>
+  <opensearch:totalResults>6325</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2610.13804v1</id>
+    <title>Constrained Probabilistic Numerics: Gaussian Process Solvers for Linear PDEs under Linear Inequality Constraints</title>
+    <updated>2026-10-09T16:18:11Z</updated>
+    <link href="https://arxiv.org/abs/2610.13804v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2610.13804v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Gaussian process solvers for linear partial differential equations (PDEs) return posteriors rather than point estimates, but they condition only on equality information: the PDE residual, boundary data, and measurements. Many solutions of interest also obey inequality constraints, including nonnegativity, monotonicity, and absence of arbitrage, which equality conditioning cannot enforce. We prove that conditioning a Gaussian process prior jointly on linear equality observations and a finite-dimensional inequality event is equivalent to conditioning sequentially in terms of Borel measures on the solution space. The physics-informed posterior is therefore a valid prior for the inequality update at virtual points. The combined law is non-Gaussian yet computable through truncated-Gaussian moments, and neither the PDE conditioning nor the inequality update requires modification. We evaluated the construction on a Poisson benchmark, option-price surfaces, and air-quality fields. Under incomplete boundary data, a monotonicity constraint lowered the error of a two-dimensional Poisson reconstruction by $63\%$. On a real S&amp;P 500 option chain thinned to $20$ retained quotes, no-arbitrage constraints reduced held-out extrapolation error by $22\%$ and cut the calendar-arbitrage rate from $10\%$ to $1\%$. On four real air-quality snapshots, nonnegativity reduced a Gaussian moment-based sub-zero-tail proxy by $74\%$ at the sparsest monitor count. Changes in mean accuracy and constraint diagnostics differed across data regimes. The probability of the noisy virtual constraint event under the equality posterior measures agreement with the specified bounds before the update. The construction turns admissibility from a post-processing step into conditioning information for probabilistic PDE solvers.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="math.NA" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-10-09T16:18:11Z</published>
+    <arxiv:comment>9 figures, 3 tables. Code available at https://github.com/bydeng01/linpde-gp</arxiv:comment>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Boyuan Deng</name>
+    </author>
+    <author>
+      <name>Kshitiz Upadhyay</name>
+    </author>
+    <author>
+      <name>Michael Shields</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2610.13779v1</id>
+    <title>PhySeqNet: physics-informed fluorescent foci detection for BARseq spatial transcriptomics</title>
+    <updated>2026-10-09T15:59:41Z</updated>
+    <link href="https://arxiv.org/abs/2610.13779v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2610.13779v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>BARseq enables spatially resolved gene-expression profiling across intact tissue, but its sensitivity depends on accurate detection and decoding of dense fluorescent rolonies. Existing spot-calling approaches can be conservative where signals overlap, while supervised deep learning is limited by the lack of reliable manual ground truth in real tissue images. Here we present PhySeqNet, a physics-informed deep learning framework for annotation-free fluorescent foci detection in BARseq. PhySeqNet trains U-Net detectors entirely on semi-synthetic images generated from an instrument-matched optical model combined with real sample-free experimental noise, and is integrated into pyBARseq, a modular Python pipeline for BARseq analysis. PhySeqNet achieved high detection performance on held-out simulated data across wavelength bands. On real tissue images, where ground truth is unavailable, we evaluated detections by forward-model reconstruction: PhySeqNet with conservative barcode-aware non-maxima suppression (NMSB) achieved higher reconstruction fidelity (NCC and MS-SSIM) than the BarDensr single-shot estimator, tuned classical spot detectors, and a pretrained deep-learning detector. In the analyzed brain section, PhySeqNet with NMSB yielded a median of 51 counts per cell versus 47 for BarDensr, with a similar number of genes detected per cell. The recovered transcripts produced spatial expression patterns qualitatively consistent with Allen MERFISH reference data and preserved cell-type composition after scANVI label transfer. These results show that physics-informed simulation can train practical, annotation-free detectors that improve BARseq sensitivity without disrupting downstream biological interpretation.</summary>
+    <category term="physics.optics" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="q-bio.QM" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-10-09T15:59:41Z</published>
+    <arxiv:comment>Correspondence: zador@cshl.edu</arxiv:comment>
+    <arxiv:primary_category term="physics.optics"/>
+    <author>
+      <name>Neha Goswami</name>
+      <arxiv:affiliation>Cold Spring Harbor Laboratory, Cold Spring Harbor, NY, USA</arxiv:affiliation>
+    </author>
+    <author>
+      <name>John Hover</name>
+      <arxiv:affiliation>Cold Spring Harbor Laboratory, Cold Spring Harbor, NY, USA</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Renae Galluccio</name>
+      <arxiv:affiliation>Cold Spring Harbor Laboratory, Cold Spring Harbor, NY, USA</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yichen Wu</name>
+      <arxiv:affiliation>Cold Spring Harbor Laboratory, Cold Spring Harbor, NY, USA</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Huiqing Zhan</name>
+      <arxiv:affiliation>Cold Spring Harbor Laboratory, Cold Spring Harbor, NY, USA</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xiaoyin Chen</name>
+      <arxiv:affiliation>Allen Institute for Brain Science, Seattle, WA, USA</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Anthony M. Zador</name>
+      <arxiv:affiliation>Cold Spring Harbor Laboratory, Cold Spring Harbor, NY, USA</arxiv:affiliation>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2610.13754v1</id>
+    <title>Utilizing Neural Networks for Solving Functional Renormalization Group Flow Equations</title>
+    <updated>2026-10-09T15:41:07Z</updated>
+    <link href="https://arxiv.org/abs/2610.13754v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2610.13754v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>A novel physics-informed neural networks (PINNs) based approach for solving functional renormalization group flow equations is presented. We investigate the finite temperature phase transition in $O(N)$ models without relying on the large-$N$ approximation, which was used in earlier attempts with similar methods. We argue that these previous solutions cannot easily be generalized for more complex symmetries, and hence our approach can provide new insight. Our technique relies on a series of ansätze that combines the small- and large-field approximation schemes with a neural network, leading to a highly accurate approximation over the entire field range. We compare the PINNs approach with traditional grid-based Runge-Kutta results and show that the network can successfully learn the temperature, field, and scale dependencies of the effective potential in the local potential approximation.</summary>
+    <category term="hep-ph" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cond-mat.stat-mech" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="hep-th" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-10-09T15:41:07Z</published>
+    <arxiv:comment>13 pages, 9 figures</arxiv:comment>
+    <arxiv:primary_category term="hep-ph"/>
+    <author>
+      <name>J. Gurzó</name>
+    </author>
+    <author>
+      <name>G. Fejős</name>
+    </author>
+  </entry>
+</feed>

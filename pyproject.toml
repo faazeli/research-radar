@@ -1,0 +1,45 @@
+[project]
+name = "research-radar"
+version = "0.1.0"
+description = "An LLM agent (LangGraph + LlamaIndex) that watches arXiv and PubMed for you, scores new papers against your brief, and writes a cited digest."
+readme = "README.md"
+authors = [
+    { name = "faazeli", email = "53350290+faazeli@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "feedparser>=6.0.14",
+    "httpx>=0.28.1",
+    "langchain>=1.4.5",
+    "langchain-anthropic>=1.7.6",
+    "langchain-core>=1.6.10",
+    "langchain-ollama>=1.1.0",
+    "langchain-openai>=1.7.1",
+    "langgraph>=1.2.15",
+    "llama-index-core>=0.14.25",
+    "llama-index-retrievers-bm25>=0.8.0",
+    "pydantic>=2.14.1",
+    "pyyaml>=6.0.3",
+    "rich>=15.0.0",
+    "typer>=0.27.3",
+]
+
+[project.scripts]
+research-radar = "research_radar:main"
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.17.0",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
