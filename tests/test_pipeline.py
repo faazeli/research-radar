@@ -10,7 +10,7 @@ from langchain_core.language_models.fake_chat_models import FakeListChatModel
 from research_radar.ask import ask
 from research_radar.config import SourceQuery, Topic
 from research_radar.graph import build_graph
-from research_radar.llm import extract_json, invoke_structured
+from research_radar.llm import extract_json, invoke_structured, json_template
 from research_radar.models import Assessment
 from research_radar.sources import parse_arxiv, parse_pubmed
 from research_radar.store import Store
@@ -102,3 +102,22 @@ def test_ask_retrieves_and_cites(tmp_path, arxiv_papers, pubmed_papers):
     ans = ask(arxiv_papers[0].title, store.all_scored("t"), llm, top_k=3)
     assert ans.text == "Answer citing [1]."
     assert ans.sources[0].paper.uid == arxiv_papers[0].uid  # BM25 finds the exact-title match first
+
+
+def test_unparseable_paper_is_skipped_not_fatal(tmp_path, arxiv_papers):
+    good = json.dumps({"relevance": 8, "rationale": "r", "tags": []})
+    summary = json.dumps({"tldr": "t", "key_findings": ["f"], "why_it_matters": "w"})
+    # paper 1: valid; paper 2: garbage twice (initial + retry); paper 3: valid; then one summary per relevant paper
+    llm = FakeListChatModel(responses=[good, "nope", "still nope", good, summary, summary])
+    store = Store(tmp_path / "s.sqlite")
+    out = build_graph(llm, store, fetchers={"arxiv": lambda q, max_results: arxiv_papers}, workers=1).invoke(
+        {"topic": _topic()}
+    )
+    assert out["failed"] == 1 and len(out["relevant"]) == 2
+    assert "could not be scored" in out["digest"]
+    assert len(store.unseen("t", arxiv_papers)) == 1  # the failed paper will be retried next run
+
+
+def test_json_template_is_an_example_not_a_schema():
+    tpl = json_template(Assessment)
+    assert '"relevance": <integer' in tpl and '"tags": ["<' in tpl and "properties" not in tpl

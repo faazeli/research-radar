@@ -4,6 +4,31 @@
 
 Built with **LangGraph** (agent orchestration), **LangChain** (provider-agnostic chat models), and **LlamaIndex** (BM25 retrieval for Q&A). It works with Anthropic Claude, OpenAI, Azure OpenAI, AWS Bedrock, or a local model through Ollama.
 
+## Sample output
+
+A real run on the `ai-oil-gas-ops` topic, fully local with **llama3.2 (3B) through Ollama on an RTX 4080**: 23 new arXiv papers screened, scored, and summarized in **25 seconds**, with no API key. Full digest: [`examples/2026-10-12_ai-oil-gas-ops.md`](examples/2026-10-12_ai-oil-gas-ops.md).
+
+> ## 5. [Towards Better Shale Gas Production Forecasting Using Transfer Learning](https://arxiv.org/abs/2106.11051)
+> Omar S. Alolayan, Samuel J. Raymond, Justin B. Montgomery et al. · arXiv cs.LG · 2021-06-21 · **relevance 8/10** · `AI` `production forecasting` `transfer learning`
+>
+> **TL;DR:** Using transfer learning, deep neural networks can improve shale gas production forecasts by up to 47% compared to traditional methods.
+>
+> - The proposed method reduces forecasting error between 11-47% compared to the Arps decline curve model
+
+The scores separate signal from noise well: decline-curve and production-forecasting papers scored 6–8, and adjacent "forecasting" papers on wind power, GDP, crypto and cloud cover scored 0.
+
+```
+$ research-radar ask "Which papers compare machine learning against Arps decline curves, and how much better was it?"
+Only paper [1] compares machine learning against Arps decline curves. According to the paper, the results
+reduce the forecasting error between 11% and 47% compared to the widely used Arps decline curve model.
+[1] Towards Better Shale Gas Production Forecasting Using Transfer Learning — https://arxiv.org/abs/2106.11051
+```
+
+**Lessons from running it on a small local model.** These are all handled in the code now:
+- 3B models tend to echo a JSON *schema* back instead of filling it in, so the prompt shows a filled-in example, and Ollama's constrained JSON mode is turned on for scoring and summaries.
+- One paper the model can't score is logged and retried on the next run instead of failing the whole digest.
+- Small models occasionally mis-number citations when retrieval returns off-topic papers. `ask` therefore searches only papers scored ≥ 4 by default; for production use, a larger model (Claude, GPT) is recommended.
+
 ## Why
 
 Reading every new paper in a fast-moving field doesn't scale, and keyword alerts are noisy. A brief like *"physics + ML hybrids validated on real industrial data; toy PDE benchmarks are low priority"* captures what you actually want, and an LLM can apply it consistently across hundreds of abstracts. research-radar turns that into a repeatable, auditable pipeline: every score comes with a rationale, and summaries are constrained to facts stated in the abstract.

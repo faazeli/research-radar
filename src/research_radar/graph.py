@@ -45,6 +45,7 @@ class RadarState(TypedDict, total=False):
     scored: list[ScoredPaper]
     relevant: list[ScoredPaper]
     digest: str
+    failed: int
 
 
 def _paper_block(p: Paper) -> str:
@@ -74,29 +75,38 @@ def build_graph(llm: BaseChatModel, store: Store, fetchers: dict[str, Callable] 
     def assess(state: RadarState) -> RadarState:
         brief = state["topic"].brief
 
-        def one(p: Paper) -> ScoredPaper:
-            a = invoke_structured(
-                llm, ASSESS_SYSTEM, f"Reader's brief:\n{brief}\n\nPaper:\n{_paper_block(p)}", Assessment
-            )
+        def one(p: Paper) -> ScoredPaper | None:
+            try:
+                a = invoke_structured(
+                    llm, ASSESS_SYSTEM, f"Reader's brief:\n{brief}\n\nPaper:\n{_paper_block(p)}", Assessment
+                )
+            except RuntimeError as err:  # unscored papers are not stored, so the next run retries them
+                log.warning("could not score %s: %s", p.uid, err)
+                return None
             return ScoredPaper(paper=p, assessment=a)
 
         with ThreadPoolExecutor(max_workers=workers) as pool:
-            scored = list(pool.map(one, state["new"]))
+            results = list(pool.map(one, state["new"]))
+        scored = [s for s in results if s is not None]
         threshold = state["topic"].min_relevance
         relevant = sorted(
             (s for s in scored if s.assessment.relevance >= threshold),
             key=lambda s: s.assessment.relevance,
             reverse=True,
         )[: state["topic"].max_in_digest]
-        return {"scored": scored, "relevant": relevant}
+        return {"scored": scored, "relevant": relevant, "failed": len(results) - len(scored)}
 
     def summarize(state: RadarState) -> RadarState:
         brief = state["topic"].brief
 
         def one(s: ScoredPaper) -> ScoredPaper:
-            summ = invoke_structured(
-                llm, SUMMARY_SYSTEM, f"Reader's brief:\n{brief}\n\nPaper:\n{_paper_block(s.paper)}", Summary
-            )
+            try:
+                summ = invoke_structured(
+                    llm, SUMMARY_SYSTEM, f"Reader's brief:\n{brief}\n\nPaper:\n{_paper_block(s.paper)}", Summary
+                )
+            except RuntimeError as err:  # the digest falls back to the relevance rationale
+                log.warning("could not summarize %s: %s", s.paper.uid, err)
+                return s
             return s.model_copy(update={"summary": summ})
 
         with ThreadPoolExecutor(max_workers=workers) as pool:
@@ -107,7 +117,8 @@ def build_graph(llm: BaseChatModel, store: Store, fetchers: dict[str, Callable] 
 
     def compose(state: RadarState) -> RadarState:
         store.save(state["topic"].name, state.get("scored", []))
-        return {"digest": render_digest(state["topic"], state.get("relevant", []), len(state.get("new", [])))}
+        n_new, n_failed = len(state.get("new", [])), state.get("failed", 0)
+        return {"digest": render_digest(state["topic"], state.get("relevant", []), n_new, n_failed)}
 
     g = StateGraph(RadarState)
     for name, fn in [
@@ -127,7 +138,7 @@ def build_graph(llm: BaseChatModel, store: Store, fetchers: dict[str, Callable] 
     return g.compile()
 
 
-def render_digest(topic: Topic, relevant: list[ScoredPaper], n_screened: int) -> str:
+def render_digest(topic: Topic, relevant: list[ScoredPaper], n_screened: int, n_failed: int = 0) -> str:
     lines = [
         f"# Research Radar: {topic.title}",
         (
@@ -136,6 +147,8 @@ def render_digest(topic: Topic, relevant: list[ScoredPaper], n_screened: int) ->
         ),
         "",
     ]
+    if n_failed:
+        lines += [f"_{n_failed} paper(s) could not be scored this run and will be retried next time._", ""]
     if not relevant:
         lines.append("_Nothing new cleared the relevance bar this time._")
         return "\n".join(lines)

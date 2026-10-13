@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from datetime import date
 from pathlib import Path
 
@@ -18,14 +19,20 @@ from .llm import get_chat_model
 from .sources import FETCHERS
 from .store import Store
 
+# Paper titles and digests contain non-ASCII text (≥, Greek letters, accents). Legacy Windows
+# consoles default to cp1252 and would crash on them, so always write UTF-8.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+
 app = typer.Typer(help="An LLM agent that watches arXiv and PubMed for you and writes a digest.", no_args_is_help=True)
 console = Console()
 
 ConfigOpt = typer.Option("config.yaml", "--config", "-c", help="Path to config YAML")
 
 
-def _llm(cfg: Config, provider: str | None, model: str | None):
-    return get_chat_model(provider or cfg.llm.provider, model or cfg.llm.model)
+def _llm(cfg: Config, provider: str | None, model: str | None, json_mode: bool = False):
+    return get_chat_model(provider or cfg.llm.provider, model or cfg.llm.model, json_mode=json_mode)
 
 
 @app.command()
@@ -40,7 +47,7 @@ def run(
     logging.basicConfig(level=logging.INFO if verbose else logging.WARNING, format="%(levelname)s %(message)s")
     cfg = Config.load(config)
     store = Store(cfg.store)
-    graph = build_graph(_llm(cfg, provider, model), store)
+    graph = build_graph(_llm(cfg, provider, model, json_mode=True), store)
     out_dir = Path(cfg.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     for t in [cfg.topic(topic)] if topic else cfg.topics:
@@ -58,7 +65,7 @@ def ask(
     question: str,
     config: Path = ConfigOpt,
     topic: str = typer.Option(None, "--topic", "-t"),
-    min_relevance: int = typer.Option(0, help="Only search papers scored at least this high"),
+    min_relevance: int = typer.Option(4, help="Only search papers scored at least this high (0 = everything)"),
     provider: str = typer.Option(None),
     model: str = typer.Option(None),
 ):

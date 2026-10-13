@@ -22,8 +22,14 @@ DEFAULT_MODELS = {
 }
 
 
-def get_chat_model(provider: str, model: str | None = None, temperature: float = 0.0) -> BaseChatModel:
-    return init_chat_model(model or DEFAULT_MODELS.get(provider), model_provider=provider, temperature=temperature)
+def get_chat_model(
+    provider: str, model: str | None = None, temperature: float = 0.0, json_mode: bool = False
+) -> BaseChatModel:
+    """`json_mode` turns on Ollama's constrained JSON decoding (used for scoring/summaries, not free-text answers)."""
+    extra = {"format": "json"} if provider == "ollama" and json_mode else {}
+    return init_chat_model(
+        model or DEFAULT_MODELS.get(provider), model_provider=provider, temperature=temperature, **extra
+    )
 
 
 _FENCE = re.compile(r"```(?:json)?\s*(\{.*?\})\s*```", re.DOTALL)
@@ -40,11 +46,32 @@ def extract_json(text: str) -> dict:
     return json.loads(text[start : end + 1])
 
 
+def json_template(schema: type[BaseModel]) -> str:
+    """A filled-in example of the expected JSON, built from the schema's field types and descriptions.
+
+    Small models tend to echo a raw JSON Schema back verbatim; an example instance is much
+    easier for them to imitate."""
+    parts = []
+    for name, field in schema.model_fields.items():
+        desc = field.description or name
+        ann = str(field.annotation)
+        if "list" in ann:
+            value = f'["<{desc}>"]'
+        elif "int" in ann:
+            value = f"<integer: {desc}>"
+        else:
+            value = f'"<{desc}>"'
+        parts.append(f'  "{name}": {value}')
+    return "{\n" + ",\n".join(parts) + "\n}"
+
+
 def invoke_structured[T: BaseModel](llm: BaseChatModel, system: str, user: str, schema: type[T], retries: int = 1) -> T:
     """Ask for JSON matching `schema`; on a parse/validation error, retry once with the error fed back."""
-    fields = json.dumps(schema.model_json_schema()["properties"], indent=1)
     messages = [
-        SystemMessage(f"{system}\n\nRespond with a single JSON object with these fields:\n{fields}\nNo other text."),
+        SystemMessage(
+            f"{system}\n\nRespond with only a JSON object in exactly this shape, replacing each <...> "
+            f"with your answer:\n{json_template(schema)}"
+        ),
         HumanMessage(user),
     ]
     last_err: Exception | None = None
